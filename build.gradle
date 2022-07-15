@@ -1,0 +1,80 @@
+import com.vladsch.flexmark.ast.Document
+import com.vladsch.flexmark.html.HtmlRenderer
+import com.vladsch.flexmark.parser.Parser
+
+version '1.0.0'
+
+buildscript {
+    apply plugin: 'groovy'
+
+    repositories {
+        mavenCentral()
+        maven{url "https://maven.aliyun.com/repository/google"}
+        jcenter()
+    }
+    dependencies {
+        classpath "gradle.plugin.org.jetbrains.intellij.plugins:gradle-intellij-plugin:0.4.26"
+        classpath 'org.codehaus.groovy:groovy-all:2.4.13'
+        classpath group: 'com.vladsch.flexmark', name: 'flexmark', version: '0.28.12'
+    }
+}
+
+apply plugin: 'org.jetbrains.intellij'
+apply plugin: 'groovy'
+
+sourceCompatibility = 1.8
+
+allprojects {
+    repositories {
+        maven{url "https://maven.aliyun.com/repository/google"}
+        jcenter()
+        //google()
+    }
+}
+
+dependencies {
+    compileOnly group: 'org.projectlombok', name: 'lombok', version: '1.18.20'
+    annotationProcessor group: 'org.projectlombok', name: 'lombok', version: '1.18.20'
+
+    compile 'org.apache.commons:commons-collections4:4.1'
+    compile 'com.miguelfonseca.completely:completely-core:0.8.0'
+
+    testCompile 'org.junit.jupiter:junit-jupiter-api:5.0.1'
+    testRuntime 'org.junit.jupiter:junit-jupiter-engine:5.0.1'
+    testCompile group: 'org.mockito', name: 'mockito-core', version: '2.12.0'
+}
+
+String readmeXmlAsHtml() {
+    Parser parser = Parser.builder().build()
+    HtmlRenderer renderer = HtmlRenderer.builder().build()
+    String readmeContent = new File(rootProject.uri('README.md')).text
+    // since these images needs to shown from within intellij, lest put absolute urls so that the images & changelog will be visible
+    Document readmeDocument = parser.parse(readmeContent)
+    renderer.render(readmeDocument)
+}
+
+String changeLogAsHtml() {
+    Parser parser = Parser.builder().build()
+    HtmlRenderer renderer = HtmlRenderer.builder().build()
+    Document changeLogDocument = parser.parse(new File(rootProject.uri('CHANGELOG.md')).text)
+    renderer.render(changeLogDocument)
+}
+
+intellij {
+    pluginName = "Putest"
+//    idea 2019 后的版本默认不再包含Java language PSI Model模块，需要手动引入，详情如下
+//    https://plugins.jetbrains.com/docs/intellij/plugin-compatibility.html?from=jetbrains.org#exploring-module-and-plugin-apis
+    version "2020.7.16"
+    plugins = ['yaml', 'Lombook Plugin:0.34-2020.1']
+    downloadSources true
+    patchPluginXml {
+        pluginDescription readmeXmlAsHtml()
+        changeNotes changeLogAsHtml()
+    }
+    publishPlugin {
+        username System.getProperty('ij_plugin_portal_login')
+        password System.getProperty('ij_plugin_portal_password')
+        channels 'eap', 'nightly', 'default'
+    }
+    updateSinceUntilBuild false
+}

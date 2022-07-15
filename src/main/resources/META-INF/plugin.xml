@@ -1,0 +1,48 @@
+<idea-plugin url="https://github.com/kamalyes/putest-plugin">
+
+    <id>com.mryu.putest.plugin</id>
+    <name>putest</name>
+    <!-- Will be auto populated by plugin -->
+    <version>1.0.0</version>
+    <vendor email="mryu168@163.com" url="https://github.com/kamalyes">@kamalyes</vendor>
+
+    <!-- Will be auto populated by plugin -->
+    <description>putest plugin</description>
+    <change-notes/>
+
+    <depends>com.intellij.modules.platform</depends>
+    <depends>com.intellij.modules.lang</depends>
+    <depends>org.jetbrains.plugins.yaml</depends>
+
+
+    <!--    <applicationListeners>-->
+    <!--        <listener class="com.shetline.lligatures.LigaturesLimited" topic="com.intellij.ide.AppLifecycleListener"/>-->
+    <!--    </applicationListeners>-->
+
+    <!--  参考： https://github.com/1tontech/intellij-spring-assistant-->
+
+    <extensions defaultExtensionNs="com.intellij">
+        <completion.contributor language="yaml"
+                                implementationClass="com.mryu.putest.plugin.suggestion.completion.YamlCompletionContributor"/>
+
+        <documentationProvider
+                implementation="com.mryu.putest.plugin.suggestion.completion.YamlDocumentationProvider"/>
+
+
+        <!--  持久化服务   -->
+        <!--  <applicationService serviceImplementation="com.mryu.putest.plugin.persistent.ServerPersistent"/> -->
+
+        <projectService
+                serviceInterface="com.mryu.putest.plugin.suggestion.service.SuggestionService"
+                serviceImplementation="com.mryu.putest.plugin.suggestion.service.SuggestionServiceImpl"/>
+
+    </extensions>
+
+    <actions>
+        <group id="putest" text="putest" class="com.mryu.putest.plugin.action.YamlAnGroup" popup="true">
+            <add-to-group group-id="ToolsMenu" anchor="last"/>
+        </group>
+    </actions>
+
+
+</idea-plugin>
